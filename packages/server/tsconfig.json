@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "declaration": true,
+    "lib": ["es2018"],
+    "types": ["node"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "strict": true,
+    "target": "es5",
+    "baseUrl": "src",
+    "paths": {
+      "@type/*": ["types/*"],
+    },
+    "rootDir": "./src",
+    "outDir": "./lib"
+  },
+  "files": [
+    "./src/index.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
