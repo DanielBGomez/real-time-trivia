@@ -28,6 +28,10 @@
     "test": {
       "dependsOn": ["build"],
       "inputs": ["all", "^public"]
+    },
+    "start": {
+      "dependsOn": ["^build", "build"],
+      "inputs": ["all"]
     }
   },
   "defaultBase": "master"
