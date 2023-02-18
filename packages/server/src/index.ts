@@ -1,7 +1,13 @@
 // Modules
 import path from 'path';
-import fs from 'fs-extra';
+import fs from 'fs';
+
 import { Server } from './modules/Server';
+import { Store } from './modules/Store';
+import { Trivia } from './modules/Trivia';
+
+// Routes
+import { TriviaRouter } from './routes/Trivia.route';
 
 // Configs
 const SSL = {
@@ -10,10 +16,29 @@ const SSL = {
 };
 const DIST = path.resolve('../../node_modules/client/lib');
 
-// Create and initialize server.
-const server = Server();
-server.init({
+// Initialize modules
+const store = new Store();
+const server = new Server({
+  store,
   port: 3100,
   distPath: DIST,
-  ssl: SSL,
+  ssl: SSL
 });
+const trivia = new Trivia({
+  broadcast: server.broadcast,
+  message: () => { return; },
+  store,
+});
+
+// Server listeners
+server.on('userLogin', trivia.userConnected);
+
+// Initialize
+server.init();
+
+console.log('server init');
+
+// Routes
+server.registerRoutes([
+  TriviaRouter
+]);
