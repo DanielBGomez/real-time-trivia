@@ -26,12 +26,12 @@ const server = new Server({
 });
 const trivia = new Trivia({
   broadcast: server.broadcast,
-  message: () => { return; },
+  message: server.message,
   store,
 });
 
 // Server listeners
-server.on('userLogin', trivia.userConnected);
+server.on('userAuth', ([ sender, uuid ]) => trivia.userConnected(sender, uuid));
 
 // Initialize
 server.init();

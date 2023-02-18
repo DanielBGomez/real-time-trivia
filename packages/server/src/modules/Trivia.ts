@@ -8,11 +8,10 @@ import { ErrorObj } from '../common/Error';
 // TS
 import { Response } from '../common/interfaces';
 import { Question } from '../schemas/Question.schema';
-import { User } from '../schemas/User.schema';
 
 
 export type Broadcast = (event: string, data: object) => Promise<object | void> | void;
-export type Message = (to: string, response: Response) => Promise<object | void> | void;
+export type Message = (to: string, event: string, response: Response) => Promise<object | void> | void;
 export interface TriviaProps {
   store: Store,
   broadcast: Broadcast, 
@@ -29,7 +28,7 @@ export class Trivia {
   private currentQuestion ?: Question;
 
   private broadcast: Broadcast = (event: string, data: object) => Promise.resolve(data);
-  private message: Message = (to, response: Response) => Promise.resolve(response);
+  private message: Message = (to, event, response: Response) => Promise.resolve(response);
 
   public status: TriviaStatus = 'CREATED';
 
@@ -43,35 +42,20 @@ export class Trivia {
   /**
    * Handle the user connection
    */
-  async userConnected (sender: string, data: User | string) {
+  async userConnected (sender: string, _uuid: string) {
     try {
-      let user;
+      const user = await this.validateUserByUUID(_uuid);
 
-      switch (typeof data) {
-        case 'string':
-          user = await this.validateUserByUUID(data);
-          break;
-        case 'object':
-          user = await this._store?.insert('user', data);
-          break;
-        default:
-          throw new ErrorObj({
-            status: 400,
-            name: 'INVALID_DATA_PROVIDED',
-            message: 'Invalid data provided'
-          });
-      }
-
-      this.message(sender, {
+      this.message(sender, 'auth', {
         status: 200,
-        name: 'Valid user',
+        name: 'Authenticated',
         data: {
           user
         }
       });
 
     } catch (error) {
-      if (error instanceof ErrorObj) this.message(sender, error);
+      if (error instanceof ErrorObj) this.message(sender, 'auth', error);
     }
   }
   /**

@@ -21,7 +21,7 @@ export class Store {
     user: '_Users',
     users: '_Users',
     question: '_Questions',
-    questions: '_Questions'
+    questions: '_Questions',
   };
 
   /* eslint-disable-next-line require-jsdoc */
