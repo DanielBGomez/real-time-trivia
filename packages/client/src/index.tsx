@@ -1,10 +1,12 @@
+// Modules
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { v4 as uuidv4} from 'uuid';
 import io from 'socket.io-client';
 
-import { App } from './modules/App';
+import { App } from './modules/App/App';
 
+// React setup
 const DOM_ELEMENT = document.getElementById('root');
 if (!DOM_ELEMENT) throw new Error('Unable to find the dom element');
 const root = ReactDOM.createRoot(DOM_ELEMENT);

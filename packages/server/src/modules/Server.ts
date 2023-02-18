@@ -91,16 +91,18 @@ export class Server extends EventEmitter {
       // Aditional options
       ...(props?.socketOptions || this.socketOptions || {})
     });
-    this._SocketServer.socketsJoin('players');
+    /**
+     * @todo prevent session impersonation
+     */
     this._SocketServer.use((socket, next) => {
       const uuid = socket.handshake.auth.uuid;
-      this.emit('userAuth', [socket.id, uuid]);
+      this.emit('userAuth', uuid);
       this._sessions[uuid] = socket.id;
       console.log(`User connected: ${uuid} - ${socket.id}`);
       next();
     });
     this._SocketServer.on('disconnection', socket => {
-      this._sessions[socket.handshake.auth.uuid] = ''; 
+      delete this._sessions[socket.handshake.auth.uuid]; 
     });
     
     // Start
@@ -113,15 +115,17 @@ export class Server extends EventEmitter {
    * Broadcast a message to all socket users in the players namespace.
    */
   broadcast (event: string, data: object): Promise<object | void> | void {
-    this._SocketServer?.to('players').emit(event, data);
+    this._SocketServer?.emit(event, data);
   }
   /**
    * Emit a message to a certain socket user
    */
   message (to: string, event: string, data: object) {
     const socketId = this._sessions[to as keyof typeof this._sessions];
-    if (!socketId) return;
+    if (!socketId) return console.log('Trying to send message to unknown socket.');
+    console.log(this._SocketServer?.sockets);
     this._SocketServer?.to(socketId).emit(event, data);
+    console.log(`Message to ${to} (${socketId}) [${event}]`);
   }
   /**
    * Register routes into the express server.

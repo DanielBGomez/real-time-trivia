@@ -36,17 +36,19 @@ export class Trivia {
   constructor (props: TriviaProps) {
     // Setup store
     this._store = props.store;
+    this.broadcast = props.broadcast;
+    this.message = props.message;
 
     return this;
   }
   /**
    * Handle the user connection
    */
-  async userConnected (sender: string, _uuid: string) {
+  async userConnected (_uuid: string) {
     try {
       const user = await this.validateUserByUUID(_uuid);
 
-      this.message(sender, 'auth', {
+      this.message(_uuid, 'auth', {
         status: 200,
         name: 'Authenticated',
         data: {
@@ -55,7 +57,7 @@ export class Trivia {
       });
 
     } catch (error) {
-      if (error instanceof ErrorObj) this.message(sender, 'auth', error);
+      if (error instanceof ErrorObj) return this.message(_uuid, 'auth', error);
     }
   }
   /**

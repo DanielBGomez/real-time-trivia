@@ -7,6 +7,7 @@ import { Socket } from 'socket.io-client';
 import 'normalize.css';
 
 // Types
+import { Response } from 'server/lib/common/interfaces';
 interface AppProps {
   uuid: string,
   socket: Socket,
@@ -38,19 +39,32 @@ export const App = ({
       socket.emit('login', uuid);
     });
     socket.on('disconnect', () => setIsConnected(false));
-    socket.auth
+    socket.on('auth', ({ status, name, data }: Response) => {
+      console.log(status, name, data);
+      switch (status) {
+      default:
+        console.log(name, data);
+      }
+      setIsLoggedIn(true);
+    });
 
     return () => {
       socket.off('connect');
       socket.off('disconnect');
-      socket.off('login');
+      socket.off('auth');
     };
   }, []);
 
   
 
   return (
-    <h1>{uuid}</h1>
+    <>
+      <h1>{uuid}</h1>
+      {isLoggedIn && (
+        <h2>is Logged in</h2>
+      )}
+      <h2>test</h2>
+    </>
   );
 };
 

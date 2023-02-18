@@ -25,13 +25,13 @@ const server = new Server({
   ssl: SSL
 });
 const trivia = new Trivia({
-  broadcast: server.broadcast,
-  message: server.message,
+  broadcast: server.broadcast.bind(server),
+  message: server.message.bind(server),
   store,
 });
 
 // Server listeners
-server.on('userAuth', ([ sender, uuid ]) => trivia.userConnected(sender, uuid));
+server.on('userAuth', (uuid) => trivia.userConnected(uuid));
 
 // Initialize
 server.init();
