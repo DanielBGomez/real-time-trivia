@@ -4,7 +4,7 @@ import http from 'http';
 import https from 'https';
 import cors from 'cors';
 import helmet from 'helmet';
-import { Server as SocketServer } from 'socket.io';
+import { Server as SocketServer, Socket } from 'socket.io';
 import { EventEmitter } from 'stream';
 
 import { Store } from './Store';
@@ -34,7 +34,7 @@ export class Server extends EventEmitter {
   private _Server?: http.Server | https.Server;
   private _SocketServer?: SocketServer;
   private _Store?: Store;
-  private _sessions: { [key: string]: string } = {};
+  private _sessions: { [key: string]: Socket } = {};
 
   public port = DEFAULT_PORT;
   public ssl?: ssl;
@@ -94,12 +94,18 @@ export class Server extends EventEmitter {
     /**
      * @todo prevent session impersonation
      */
-    this._SocketServer.use((socket, next) => {
+    this._SocketServer.on('connection', socket => {
+      // Store socket
       const uuid = socket.handshake.auth.uuid;
       this.emit('userAuth', uuid);
-      this._sessions[uuid] = socket.id;
+      this._sessions[uuid] = socket;
       console.log(`User connected: ${uuid} - ${socket.id}`);
-      next();
+
+      // Register listeners
+      socket.on('register', name => {
+        console.log('register');
+        this.emit('register', [ uuid, { name} ]);
+      });
     });
     this._SocketServer.on('disconnection', socket => {
       delete this._sessions[socket.handshake.auth.uuid]; 
@@ -121,11 +127,10 @@ export class Server extends EventEmitter {
    * Emit a message to a certain socket user
    */
   message (to: string, event: string, data: object) {
-    const socketId = this._sessions[to as keyof typeof this._sessions];
-    if (!socketId) return console.log('Trying to send message to unknown socket.');
-    console.log(this._SocketServer?.sockets);
-    this._SocketServer?.to(socketId).emit(event, data);
-    console.log(`Message to ${to} (${socketId}) [${event}]`);
+    const socket = this._sessions[to as keyof typeof this._sessions];
+    if (!socket) return console.log('Trying to send message to unknown socket.');
+    socket.emit(event, data);
+    console.log(`Message to ${to} (${socket.id}) [${event}]`);
   }
   /**
    * Register routes into the express server.

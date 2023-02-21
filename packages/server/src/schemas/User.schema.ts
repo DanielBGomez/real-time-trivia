@@ -5,8 +5,8 @@ import { Schema } from 'mongoose';
 export interface User {
   _id: string,
   name: string,
-  image: string,
-  score: number,
+  image?: string,
+  score?: number,
 };
 
 // Schema

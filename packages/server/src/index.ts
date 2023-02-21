@@ -32,6 +32,7 @@ const trivia = new Trivia({
 
 // Server listeners
 server.on('userAuth', (uuid) => trivia.userConnected(uuid));
+server.on('register', ([ uuid, data ]) => trivia.registerUser(uuid, { _id: uuid, ...data}));
 
 // Initialize
 server.init();

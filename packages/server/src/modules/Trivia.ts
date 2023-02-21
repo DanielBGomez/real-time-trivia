@@ -8,6 +8,7 @@ import { ErrorObj } from '../common/Error';
 // TS
 import { Response } from '../common/interfaces';
 import { Question } from '../schemas/Question.schema';
+import { User } from 'schemas/User.schema';
 
 
 export type Broadcast = (event: string, data: object) => Promise<object | void> | void;
@@ -86,6 +87,26 @@ export class Trivia {
     }
 
     return userData;
+  }
+
+  /**
+   * Regiter an User into the store
+   */
+  async registerUser (_uuid: string, data: User) {
+    try {
+      const user = await this._store?.insert('user', data);
+
+      this.message(_uuid, 'login', {
+        status: 200,
+        name: 'LOGIN',
+        data: {
+          user
+        }
+      });
+
+    } catch (error) {
+      if (error instanceof ErrorObj) return this.message(_uuid, 'login', error);
+    }
   }
 
 }
