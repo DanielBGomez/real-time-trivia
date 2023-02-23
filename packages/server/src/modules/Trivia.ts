@@ -108,5 +108,4 @@ export class Trivia {
       if (error instanceof ErrorObj) return this.message(_uuid, 'login', error);
     }
   }
-
 }
